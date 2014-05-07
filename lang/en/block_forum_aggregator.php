@@ -16,7 +16,7 @@
 /*
  * @package    block
  * @subpackage forum_aggregator
- * @author     Tõnis Tartes <t6nis20@gmail.com>
+ * @author     Tï¿½nis Tartes <t6nis20@gmail.com>
  * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,7 +30,8 @@ $string['forum_selection'] = 'Forum selection';
 $string['noposts'] = 'No posts';
 
 $string['posts'] = 'Posts';
-$string['posted'] = 'Posted: ';
+$string['posted'] = '';
+$string['read_more'] = 'Read More';
 $string['forum_description'] = 'Forum description';
 
 //Help strings
@@ -38,6 +39,14 @@ $string['max_num_of_posts'] = 'Maximum number of posts';
 $string['max_num_of_posts_help'] = 'Select maximum number of latest posts to be shown in block.';
 
 $string['forum_selection'] = 'Forum selection';
-$string['forum_selection_help'] = 'If you want to show posts from this specific forum, then you have to check this box.'
+$string['forum_selection_help'] = 'If you want to show posts from this specific forum, then you have to check this box.';
+
+$string['past_day'] = 'yesterday';
+$string['past_days'] = '{$a} days ago';
+$string['past_hours'] = '{$a} hours ago';
+$string['past_hour'] = 'last hour';
+$string['past_minutes'] = '{$a} minutes ago';
+$string['past_minute'] = 'last minute';
+$string['past_now'] = 'just now';
 
 ?>

@@ -16,10 +16,12 @@
 /*
  * @package    block
  * @subpackage forum_aggregator
- * @author     Tõnis Tartes <t6nis20@gmail.com>
+ * @author     Tï¿½nis Tartes <t6nis20@gmail.com>
  * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+require_once($CFG->dirroot.'/blocks/forum_aggregator/locallib.php');
 
 class block_forum_aggregator extends block_base {
     
@@ -110,20 +112,23 @@ class block_forum_aggregator extends block_base {
                             foreach ($posts as $post) {
 
                                 $post->message = format_string($post->message, true, $COURSE->id);                        
-                                $post->message = shorten_text($post->message, 80, true, '');
+                                $post->message = shorten_text($post->message, 80, true);
+                                $post->subject = shorten_text($post->subject, 60, true);
 
                                 $user = $DB->get_record('user', array('id'=>$post->userid), '*', MUST_EXIST);
                                 
                                 $text .= html_writer::start_tag('li', array('class' => 'post')).
                                          html_writer::start_tag('div', array('class' => 'head')).
+                                         html_writer::tag('div', $OUTPUT->user_picture($user, array('size'=>40, 'class'=>'userpostpic')), array('class' => 'userpic')).
                                          html_writer::tag('div', $post->subject, array('class' => 'subject')).
-                                         html_writer::tag('div', $OUTPUT->user_picture($user, array('size'=>21, 'class'=>'userpostpic')), array('class' => 'userpic')).
-                                         html_writer::tag('div', fullname($post), array('class' => 'name')).
-                                         html_writer::tag('div', get_string('posted', 'block_forum_aggregator').userdate($post->modified, $strftimerecent), array('class' => 'date')).
-                                         html_writer::end_tag('div').
+//                                          html_writer::tag('div', fullname($post), array('class' => 'name')).
                                          html_writer::start_tag('div').
                                          $post->message.' '.
-                                         html_writer::link(new moodle_url('/mod/forum/discuss.php?d='.$post->discussion.'#p'.$post->id), $strmore.'...' , array('class' => 'postreadmore')).
+                                         html_writer::end_tag('div').
+                                         html_writer::tag('div', get_string('posted', 'block_forum_aggregator').humanizeDateDiffference((int)usertime(time()), (int)usertime($post->modified)), array('class' => 'date')).
+                                         html_writer::end_tag('div').
+                                        html_writer::start_tag('div', array('class' => 'more')).
+                                         html_writer::link(new moodle_url('/mod/forum/discuss.php?d='.$post->discussion.'#p'.$post->id), $strmore, array('class' => 'postreadmore')).
                                          html_writer::end_tag('div').
                                          html_writer::end_tag('li');
                             }
@@ -140,7 +145,7 @@ class block_forum_aggregator extends block_base {
         
         return $this->content;
     }
-    
+
     public function instance_config_save($data, $nolongerused = false) {
 
         global $CFG;
