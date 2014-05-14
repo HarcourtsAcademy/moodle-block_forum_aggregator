@@ -39,6 +39,9 @@ function humanizeDateDiffference($now,$otherDate=null,$offset=null){
 	if ($otherDate != null) {
 		$offset = $now - $otherDate;
 	}
+    if ($offset == 0) {
+        return get_string('past_now', 'block_forum_aggregator');
+    }
 	if ($offset != null) {
 		$deltaS = $offset%60;
 		$offset /= 60;
