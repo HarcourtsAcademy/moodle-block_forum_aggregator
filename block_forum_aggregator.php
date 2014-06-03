@@ -99,14 +99,17 @@ class block_forum_aggregator extends block_base {
                         //show list                        
                         $text .= html_writer::start_tag('ul', array('class'=> 'unlist'));
                         $text .= html_writer::tag('li', html_writer::link(new moodle_url('/mod/forum/view.php?id='.$cm->id), $cm->name), array('class' => 'forum_title'));
-                        
-                        $posts = $DB->get_records_sql('SELECT d.id, p.*, u.firstname, u.lastname, u.email, u.picture, u.imagealt
-                                            FROM {forum_discussions} d
-                                            LEFT JOIN {forum_posts} p ON p.discussion = d.id
-                                            LEFT JOIN {user} u ON p.userid = u.id
-                                            WHERE d.forum = "'.$key.'"
-                                            ORDER BY p.modified DESC LIMIT 0, '.$max_posts.'');
-                        
+
+                        $sql = 'SELECT d.id, p.*, u.firstname, u.lastname, u.email, u.picture, u.imagealt
+                                        FROM {forum_discussions} d
+                                        LEFT JOIN {forum_posts} p ON p.discussion = d.id
+                                        LEFT JOIN {user} u ON p.userid = u.id
+                                        WHERE d.forum = :forumid
+                                        ORDER BY p.modified DESC';
+
+                        $limitfrom = 0;
+                        $posts = $DB->get_records_sql($sql, array('forumid'=>$key), $limitfrom, $max_posts);
+
                         if (!empty($posts)) {
 
                             foreach ($posts as $post) {
