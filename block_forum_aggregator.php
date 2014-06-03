@@ -122,7 +122,7 @@ class block_forum_aggregator extends block_base {
                                 $groupids[] = $group->id;
                             }
 
-                            /// Here it's the query param (we are looking for 'general' forums in this example)
+                            /// Here it's the query param to find the configured forum
                             $queryparams=array('forumid'=>$key);
 
                             list($insql, $inparams) = $DB->get_in_or_equal($groupids, SQL_PARAMS_NAMED);
@@ -136,8 +136,8 @@ class block_forum_aggregator extends block_base {
                                             ORDER BY p.modified DESC";
 
 
-                            /// Here we merge all params (query ones and IN clause ones,
-                            /// respecting the order they are used in the query!)
+                            /// Merge all params (query ones and IN clause ones
+                            /// (as we are using named params, order isn't important)
                             $sqlparams = array_merge($inparams, $queryparams);
 
                             $limitfrom = 0;
