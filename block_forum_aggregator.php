@@ -95,20 +95,54 @@ class block_forum_aggregator extends block_base {
                     
                     //if visible
                     if ($cm->visible == 1) {
-                        
+
+                        $groupmode = groups_get_activity_groupmode($cm);
+
                         //show list                        
                         $text .= html_writer::start_tag('ul', array('class'=> 'unlist'));
                         $text .= html_writer::tag('li', html_writer::link(new moodle_url('/mod/forum/view.php?id='.$cm->id), $cm->name), array('class' => 'forum_title'));
 
-                        $sql = 'SELECT d.id, p.*, u.firstname, u.lastname, u.email, u.picture, u.imagealt
-                                        FROM {forum_discussions} d
-                                        LEFT JOIN {forum_posts} p ON p.discussion = d.id
-                                        LEFT JOIN {user} u ON p.userid = u.id
-                                        WHERE d.forum = :forumid
-                                        ORDER BY p.modified DESC';
+                        $posts ='';
+                        if ($groupmode == NOGROUPS) {
+                            $sql = 'SELECT d.id, p.*, u.firstname, u.lastname, u.email, u.picture, u.imagealt
+                                            FROM {forum_discussions} d
+                                            LEFT JOIN {forum_posts} p ON p.discussion = d.id
+                                            LEFT JOIN {user} u ON p.userid = u.id
+                                            WHERE d.forum = :forumid
+                                            ORDER BY p.modified DESC';
+                            $limitfrom = 0;
+                            $posts = $DB->get_records_sql($sql, array('forumid'=>$key),
+                                                        $limitfrom, $max_posts);
+                        } else {
+                            $groupids = array();
+                            $groupids[] = '-1'; /// Show trainer posts to everyone
+                            /// Show all posts to those with full access to the forum
+                            $groups = groups_get_activity_allowed_groups($cm);
+                            foreach ($groups as $group) {
+                                $groupids[] = $group->id;
+                            }
 
-                        $limitfrom = 0;
-                        $posts = $DB->get_records_sql($sql, array('forumid'=>$key), $limitfrom, $max_posts);
+                            /// Here it's the query param (we are looking for 'general' forums in this example)
+                            $queryparams=array('forumid'=>$key);
+
+                            list($insql, $inparams) = $DB->get_in_or_equal($groupids, SQL_PARAMS_NAMED);
+
+                            $sql = "SELECT d.id, p.*, u.firstname, u.lastname, u.email, u.picture, u.imagealt
+                                            FROM {forum_discussions} d
+                                            LEFT JOIN {forum_posts} p ON p.discussion = d.id
+                                            LEFT JOIN {user} u ON p.userid = u.id
+                                            WHERE d.forum = :forumid
+                                                AND d.groupid $insql
+                                            ORDER BY p.modified DESC";
+
+
+                            /// Here we merge all params (query ones and IN clause ones,
+                            /// respecting the order they are used in the query!)
+                            $sqlparams = array_merge($inparams, $queryparams);
+
+                            $limitfrom = 0;
+                            $posts = $DB->get_records_sql($sql, $sqlparams, $limitfrom, $max_posts);
+                        }
 
                         if (!empty($posts)) {
 
