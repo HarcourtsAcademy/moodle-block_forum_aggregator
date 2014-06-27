@@ -31,7 +31,7 @@ $string['noposts'] = 'No posts';
 
 $string['posts'] = 'Posts';
 $string['posted'] = '';
-$string['read_more'] = 'Read';
+$string['read_more'] = 'View';
 $string['forum_description'] = 'Forum description';
 
 //Help strings
