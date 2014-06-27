@@ -91,7 +91,7 @@ class block_forum_aggregator extends block_base {
                     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
 
                     $strftimerecent = get_string('strftimerecent');
-                    $strmore = get_string('more', 'forum');
+                    $strmore = get_string('read_more', 'block_forum_aggregator');
                     
                     //if visible
                     if ($cm->visible == 1) {
