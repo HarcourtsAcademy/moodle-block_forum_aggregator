@@ -24,7 +24,6 @@
 
 function get_posted($posteddate) {
     $now = date_create();
-    error_log("now: " . $now);
     $posteddate = new DateTime('2014-05-07');
     $interval = $now->diff($posteddate);
     return $interval->format('%R%i min');
