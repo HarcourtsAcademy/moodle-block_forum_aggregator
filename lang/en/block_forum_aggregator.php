@@ -42,3 +42,13 @@ $string['forum_selection_help'] = 'If you want to show posts from this specific 
 
 $string['unread_post_color'] = 'Unread color';
 $string['unread_post_color_description'] = 'Define the color background of unread posts.';
+
+/* Added by Harcourts Academy */
+$string['read_more'] = 'View';
+$string['past_day'] = 'yesterday';
+$string['past_days'] = '{$a} days ago';
+$string['past_hours'] = '{$a} hours ago';
+$string['past_hour'] = 'last hour';
+$string['past_minutes'] = '{$a} minutes ago';
+$string['past_minute'] = 'last minute';
+$string['past_now'] = 'just now';

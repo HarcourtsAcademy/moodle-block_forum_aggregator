@@ -21,6 +21,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+require_once($CFG->dirroot.'/blocks/forum_aggregator/locallib.php');
+
 class block_forum_aggregator extends block_base {
     
     public function init() {
@@ -93,10 +95,12 @@ class block_forum_aggregator extends block_base {
                     $context = context_module::instance($cm->id);
 
                     $strftimerecent = get_string('strftimerecent');
-                    $strmore = get_string('more', 'forum');
+                    $strmore = get_string('read_more', 'block_forum_aggregator');
                     
                     //if visible
                     if ($cm->visible == 1) {
+
+                        $groupmode = groups_get_activity_groupmode($cm);
                         
                         if (! $forum = $DB->get_record("forum", array("id" => $key))) {
                             print_error('invalidforumid', 'forum');
@@ -107,12 +111,48 @@ class block_forum_aggregator extends block_base {
                         $text .= html_writer::tag('li', html_writer::link(new moodle_url('/mod/forum/view.php?id='.$cm->id), $cm->name), array('class' => 'forum_title'));
                         
                         $allnames = get_all_user_name_fields(true, 'u');
-                        $posts = $DB->get_records_sql('SELECT d.id, p.*, '.$allnames.', u.email, u.picture, u.imagealt
+                        $posts ='';
+                        if ($groupmode == NOGROUPS) {
+                            $sql = 'SELECT d.id, p.*, '.$allnames.', u.email, u.picture, u.imagealt
                                             FROM {forum_discussions} d
                                             LEFT JOIN {forum_posts} p ON p.discussion = d.id
                                             LEFT JOIN {user} u ON p.userid = u.id
-                                            WHERE d.forum = "'.$key.'"
-                                            ORDER BY p.modified DESC LIMIT 0, '.$max_posts.'');
+                                            WHERE d.forum = :forumid
+                                            ORDER BY p.modified DESC';
+                            $limitfrom = 0;
+                            $posts = $DB->get_records_sql($sql, array('forumid'=>$key),
+                                                        $limitfrom, $max_posts);
+                        } else {
+                            $groupids = array();
+                            $groupids[] = '-1'; /// Show trainer posts to everyone
+                            /// Show all posts to those with full access to the forum
+                            $groups = groups_get_activity_allowed_groups($cm);
+                            foreach ($groups as $group) {
+                                $groupids[] = $group->id;
+                            }
+
+                            /// Here it's the query param to find the configured forum
+                            $queryparams=array('forumid'=>$key);
+
+                            list($insql, $inparams) = $DB->get_in_or_equal($groupids, SQL_PARAMS_NAMED);
+
+                            $sql = "SELECT d.id, p.*, '.$allnames.', u.email, u.picture, u.imagealt
+                                            FROM {forum_discussions} d
+                                            LEFT JOIN {forum_posts} p ON p.discussion = d.id
+                                            LEFT JOIN {user} u ON p.userid = u.id
+                                            WHERE d.forum = :forumid
+                                                AND d.groupid $insql
+                                            ORDER BY p.modified DESC";
+
+
+                            /// Merge all params (query ones and IN clause ones
+                            /// (as we are using named params, order isn't important)
+                            $sqlparams = array_merge($inparams, $queryparams);
+
+                            $limitfrom = 0;
+                            $posts = $DB->get_records_sql($sql, $sqlparams, $limitfrom, $max_posts);
+                        }
+
                         
                         if (!empty($posts)) {
                             
@@ -128,18 +168,25 @@ class block_forum_aggregator extends block_base {
                                 $post->message = format_string($post->message, true, $COURSE->id);                        
                                 $post->message = shorten_text($post->message, 80, true, '');
 
+                                $post->subject = format_string($post->subject, true, $COURSE->id);
+                                $post->subject = shorten_text($post->subject, 60, true, '');
+
                                 $user = $DB->get_record('user', array('id'=>$post->userid), '*', MUST_EXIST);
                                 
                                 $text .= html_writer::start_tag('li', $post_style).
                                          html_writer::start_tag('div', array('class' => 'head')).
-                                         html_writer::tag('div', $post->subject, array('class' => 'subject')).
                                          html_writer::tag('div', $OUTPUT->user_picture($user, array('size'=>21, 'class'=>'userpostpic')), array('class' => 'userpic')).
-                                         html_writer::tag('div', fullname($post), array('class' => 'name')).
-                                         html_writer::tag('div', get_string('posted', 'block_forum_aggregator').userdate($post->modified, $strftimerecent), array('class' => 'date')).
-                                         html_writer::end_tag('div').
+                                         html_writer::tag('div', $post->subject, array('class' => 'subject')).
+//                                         html_writer::tag('div', fullname($post), array('class' => 'name')).
+//                                         html_writer::tag('div', get_string('posted', 'block_forum_aggregator').userdate($post->modified, $strftimerecent), array('class' => 'date')).
+//                                         html_writer::end_tag('div').
                                          html_writer::start_tag('div').
                                          $post->message.' '.
-                                         html_writer::link(new moodle_url('/mod/forum/discuss.php?d='.$post->discussion.'#p'.$post->id), $strmore.'...' , array('class' => 'postreadmore')).
+                                         html_writer::end_tag('div').
+                                         html_writer::tag('div', get_string('posted', 'block_forum_aggregator').humanizeDateDiffference((int)usertime(time()), (int)usertime($post->modified)), array('class' => 'date')).
+                                         html_writer::end_tag('div').
+                                         html_writer::start_tag('div', array('class' => 'more')).
+                                         html_writer::link(new moodle_url('/mod/forum/discuss.php?d='.$post->discussion.'#p'.$post->id), $strmore, array('class' => 'postreadmore')).
                                          html_writer::end_tag('div').
                                          html_writer::end_tag('li');
                             }
