@@ -21,8 +21,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$plugin->version = 2014062700;
+$plugin->version = 2015030200;
 $plugin->requires = 2013101800;
-
+$plugin->component = 'block_forum_aggregator';
 $plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = "2014062700"; // User-friendly version number
+$plugin->release   = "2015030200"; // User-friendly version number
