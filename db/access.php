@@ -24,6 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+/* START Academy Patch M#062 Forum Aggregation block customisations. */
 $capabilities = array(
 
     'block/forum_aggregator:addinstance' => array(
@@ -40,16 +41,14 @@ $capabilities = array(
     ),
     
     'block/forum_aggregator:myaddinstance' => array(
-        'riskbitmask' => RISK_SPAM | RISK_XSS,
-
         'captype' => 'write',
-        'contextlevel' => CONTEXT_BLOCK,
+        'contextlevel' => CONTEXT_SYSTEM,
         'archetypes' => array(
-            'editingteacher' => CAP_PROHIBIT,
-            'manager' => CAP_PROHIBIT
+            'user' => CAP_PROHIBIT
         ),
 
-        'clonepermissionsfrom' => 'moodle/site:manageblocks'
+        'clonepermissionsfrom' => 'moodle/my:manageblocks'
     ),
     
 );
+/* END Academy Patch M#062 */

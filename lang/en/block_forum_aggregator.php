@@ -44,6 +44,8 @@ $string['unread_post_color'] = 'Unread color';
 $string['unread_post_color_description'] = 'Define the color background of unread posts.';
 
 /* START Academy Patch M#062 Forum Aggregation block customisations. */
+$string['forum_aggregator:addinstance'] = 'Add a new Forum Aggregator block';
+$string['forum_aggregator:myaddinstance'] = 'Add a new Forum Aggregator block to the My Moodle page';
 $string['read_more'] = 'View';
 $string['past_day'] = 'yesterday';
 $string['past_days'] = '{$a} days ago';
